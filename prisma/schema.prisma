@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fieldReference"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Sale {
+  id               String      @id @default(cuid())
+  deliveryLocation String
+  deliveryCost     Float
+  paymentType      PaymentType
+
+  merch   Merch  @relation(fields: [merchId], references: [id])
+  merchId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Merch {
+  id           String    @id @default(cuid())
+  type         MerchType
+  basePrice    Float
+  sellingPrice Float
+  design       String
+
+  sales     Sale[]
+  creator   Creator @relation(fields: [creatorId], references: [id])
+  creatorId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Creator {
+  id       String @id @default(cuid())
+  username String @unique
+  name     String
+  photo    String
+  tagline  String
+
+  merches       Merch[]
+  usersWhoFaved User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id       String  @id @default(cuid())
+  username String  @unique
+  name     String
+  email    String
+  password String?
+
+  favCreators Creator[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum MerchType {
+  SHIRT
+}
+
+enum PaymentType {
+  COD
+  KHALTI
+}
